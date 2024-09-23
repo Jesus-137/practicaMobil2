@@ -27,24 +27,13 @@ class _InputButtonLabelScreenState extends State<Reto1Screen> {
   final TextEditingController _controller = TextEditingController();
   String _labelText = "Ingrese algo y presione el botón";
 
-  Future<void> _makeHttpRequest(String input) async {
-    // Aquí se realiza una solicitud HTTP simulada (puedes cambiarla a tu URL).
-    final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/todos/1'));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _labelText = 'Respuesta: ${json.decode(response.body)['title']}';
-      });
-    } else {
-      setState(() {
-        _labelText = 'Error: No se pudo obtener la respuesta';
-      });
-    }
-  }
-
   void _onButtonPressed() {
+    String texto = _controller.text;
+    print(texto);
     if (_controller.text.isNotEmpty) {
-      _makeHttpRequest(_controller.text);
+      setState(() {
+        _labelText = 'Texto ingresado: ${texto}';
+      });
     } else {
       setState(() {
         _labelText = 'Por favor, ingrese un valor';

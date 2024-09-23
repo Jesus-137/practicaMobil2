@@ -185,6 +185,13 @@ class _ContactScreenState extends State<ContactScreen> with SingleTickerProvider
     );
   }
 
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw Exception('No se pudo abrir la URL: $url');
+    }
+  }
+
   Widget _buildItem(Map<String, String> contact, Animation<double> animation) {
     return FadeTransition(
       opacity: animation,
@@ -217,6 +224,12 @@ class _ContactScreenState extends State<ContactScreen> with SingleTickerProvider
                 icon: const Icon(Icons.message, color: Colors.blue),
                 onPressed: () {
                   _sendMessage(contact['phone']!);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.gite, color: Colors.red),
+                onPressed: () {
+                  _launchUrl('https://github.com/Jesus-137/practicaMobil2.git');
                 },
               ),
             ],
