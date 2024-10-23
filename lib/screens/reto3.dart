@@ -3,8 +3,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 void main() {
   runApp(MyApp());
@@ -85,20 +85,17 @@ class _GeolocationPageState extends State<GeolocationPage> {
   String _location = 'Unknown';
 
   void _getCurrentLocation() async {
-    // Solicitar permisos de ubicación
     var status = await Permission.location.status;
     if (!status.isGranted) {
       await Permission.location.request();
     }
 
-    // Verificar si el permiso ha sido concedido
     if (await Permission.location.isGranted) {
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       setState(() {
         _location = '${position.latitude}, ${position.longitude}';
       });
     } else {
-      // Manejar el caso donde el permiso no fue concedido
       setState(() {
         _location = 'Location permission denied';
       });
@@ -131,18 +128,48 @@ class QRCodePage extends StatefulWidget {
 }
 
 class _QRCodePageState extends State<QRCodePage> {
+  QRViewController? controller;
+  String? qrCodeResult; // Variable para almacenar el resultado del QR
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('QR Code Scanner')),
-      body: Center(
-        child: QrImageView(
-          data: '1234567890',
-          version: QrVersions.auto,
-          size: 200.0,
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 4,
+            child: QRView(
+              key: GlobalKey(debugLabel: 'QR'),
+              onQRViewCreated: _onQRViewCreated,
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: qrCodeResult != null 
+                ? Text('Código escaneado: $qrCodeResult') // Mostrar el resultado
+                : Text('Escanea un código QR'),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) {
+      setState(() {
+        qrCodeResult = scanData.code; // Guardar el código escaneado
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
   }
 }
 
